@@ -1,8 +1,39 @@
-<body>
+<head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #health,
+    #scoreboard,
+    #timer {
+      margin-right: 35px;
+    }
+  </style>
+</head>
+<body
+  style="
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  "
+>
   <!-- User Info -->
-  <div style="display: flex; align-items: center; font-size: 75px">
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      font-size: 50px;
+      margin-bottom: 5px;
+    "
+  >
     <div id="health"></div>
     <div id="scoreboard">Score: 0</div>
+    <div id="timer">Time: 0</div>
   </div>
   <canvas></canvas>
   <script type="module" src="main.js"></script>

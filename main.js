@@ -4,6 +4,8 @@ import { Enemy } from "./Enemy.js";
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 const scoreBoard = document.getElementById("scoreboard");
+const timer = document.getElementById("timer");
+const hearthBar = document.getElementById("health");
 canvas.width = 1024;
 canvas.height = 576;
 
@@ -25,14 +27,12 @@ const player = new Player({
   health: HEALTH,
   speed: SPEED,
 });
-const hearthBar = document.getElementById("health");
+
 for (let i = 0; i < HEALTH; ++i) {
   hearthBar.innerHTML += "&hearts;";
 }
 
-const intervalId = setInterval(() => {
-  // const enemyWidth = Math.random() * 20;
-  // const enemyHeight = Math.random() * 20;
+const enemyInterval = setInterval(() => {
   const enemyWidth = 25;
   const enemyHeight = 25;
 
@@ -52,6 +52,22 @@ const intervalId = setInterval(() => {
 
   player.addNewEnemy(enemy);
   console.log("Enemy added!");
+}, 3000);
+
+let secondsTime = 0;
+let minutesTime = 0;
+
+const timeInterval = setInterval(() => {
+  ++secondsTime;
+  if (secondsTime / 60 == 1) {
+    ++minutesTime;
+    secondsTime = 0;
+  }
+  if (minutesTime == 0) {
+    timer.innerHTML = `Time: ${secondsTime} `;
+  } else {
+    timer.innerHTML = `Time: ${minutesTime}:${secondsTime}`;
+  }
 }, 1000);
 
 function animate() {
@@ -62,9 +78,11 @@ function animate() {
 
   player.update();
 
-  if (player.health == 0) {
+  if (player.health <= 0) {
     cancelAnimationFrame(animationId);
-    scoreBoard.innerHTML = "Game over! You lose!";
+    hearthBar.innerHTML = "Game over!";
+    clearInterval(enemyInterval);
+    clearInterval(timeInterval);
   }
 }
 

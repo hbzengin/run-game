@@ -88,7 +88,7 @@ export class Player {
           this.enemies.splice(i, 1);
           this.projectiles.splice(j, 1);
           this.points += 50;
-          scoreBoard.innerHTML = `Score: ${this.points}`;
+          scoreBoard.innerHTML = `Score: ${this.points} `;
           console.log(this.points);
         }
       }
