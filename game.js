@@ -61,7 +61,7 @@ class Character {
   update() {
     this.xvel = 0;
     this.yvel = 0;
-    c.fillStyle = "red";
+    c.fillStyle = "blue";
 
     c.fillRect(
       player.position.x,
@@ -151,7 +151,26 @@ class Character {
 };
 
 class Enemy {
-    constructor({target, width, height, health, speed}) {}
+    constructor({position, target, width, height, health, speed}) {
+        this.position = position
+        this.target = target;
+        this.width = width;
+        this.height = height;
+        this.health = health;
+        this.speed = speed;
+    }
+
+    update() {
+        c.fillStyle = "red";
+
+        const xDist = target.position.x - this.position.x;
+        const yDist = target.position.y - this.position.y;
+        const ratio = xDist / yDist;
+
+        // const xVel = this.speed * ratio;
+        // const yVel = this.speed * (1-ratio);
+
+    }
 };
 
 const player = new Character({position: {x: 0, y:0}, width: 25, height: 25, health: 100, speed: 3});
