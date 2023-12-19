@@ -4,6 +4,7 @@ const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 const heartBar = document.getElementById("health");
 const scoreBoard = document.getElementById("scoreboard");
+const infoBar = document.getElementById("info");
 canvas.width = 1024;
 canvas.height = 576;
 
@@ -29,6 +30,10 @@ export class Player {
       space: false,
     };
     this.points = 0;
+    this.fasterShoot = false;
+    this.biggerProjectiles = false;
+    this.penetratingProjectiles = false;
+    this.buffOnMap = null;
   }
 
   update() {
@@ -37,6 +42,12 @@ export class Player {
 
     if (this.onHitCooldown) {
       c.fillStyle = "lightblue";
+    } else if (this.fasterShoot) {
+      c.fillStyle = "orange";
+    } else if (this.biggerProjectiles) {
+      c.fillStyle = "purple";
+    } else if (this.penetratingProjectiles) {
+      c.fillStyle = "green";
     } else {
       c.fillStyle = "blue";
     }
@@ -86,7 +97,12 @@ export class Player {
           proj.currentPos.y + proj.height / 2 <= enemy.position.y + enemy.height
         ) {
           this.enemies.splice(i, 1);
-          this.projectiles.splice(j, 1);
+
+          // if not penetrating projectiles, then remove!
+          if (!this.penetratingProjectiles) {
+            this.projectiles.splice(j, 1);
+          }
+
           this.points += 50;
           scoreBoard.innerHTML = `Score: ${this.points} `;
           console.log(this.points);
@@ -118,6 +134,56 @@ export class Player {
       }
     }
 
+    // update buff on map
+    if (this.buffOnMap) {
+      const buff = this.buffOnMap;
+      if (buff.type == 0) {
+        c.fillStyle = "orange";
+      } else if (buff.type == 1) {
+        c.fillStyle = "purple";
+      } else if (buff.type == 2) {
+        c.fillStyle = "green";
+      }
+
+      c.fillRect(buff.position.x, buff.position.y, buff.width, buff.height);
+    }
+
+    // detect player hit on buff
+    if (this.buffOnMap) {
+      const buff = this.buffOnMap;
+      if (
+        this.position.x + this.width / 2 >= buff.position.x &&
+        this.position.x + this.width / 2 <= buff.position.x + buff.width &&
+        this.position.y + this.height / 2 >= buff.position.y &&
+        this.position.y + this.height / 2 <= buff.position.y + buff.height
+      ) {
+        if (buff.type == 0) {
+          this.fasterShoot = true;
+          infoBar.innerHTML = "Buff activated! You shoot faster!";
+          setTimeout(() => {
+            this.fasterShoot = false;
+            infoBar.innerHTML = "";
+          }, 7500);
+        } else if (buff.type == 1) {
+          this.biggerProjectiles = true;
+          infoBar.innerHTML = "Buff activated! You shoot bigger projectiles!";
+          setTimeout(() => {
+            this.biggerProjectiles = false;
+            infoBar.innerHTML = "";
+          }, 7500);
+        } else if (buff.type == 2) {
+          this.penetratingProjectiles = true;
+          infoBar.innerHTML = "Buff activated! You shoot penetrating shots!";
+          setTimeout(() => {
+            this.penetratingProjectiles = false;
+            infoBar.innerHTML = "";
+          }, 7500);
+        }
+
+        this.buffOnMap = null;
+      }
+    }
+
     // move player
     this.position.x = this.position.x + this.xvel;
     this.position.y = this.position.y + this.yvel;
@@ -125,9 +191,8 @@ export class Player {
 
   shoot() {
     if (this.onShootCooldown) return;
-
-    const projWidth = 10;
-    const projHeight = 10;
+    let projWidth = this.biggerProjectiles ? 40 : 10;
+    let projHeight = this.biggerProjectiles ? 40 : 10;
     let endCoords;
     let startCoords;
     let xvel = 0;
@@ -137,7 +202,7 @@ export class Player {
       case "n":
         startCoords = {
           x: this.position.x + this.width / 2 - projWidth / 2,
-          y: this.position.y,
+          y: this.position.y - projHeight,
         };
         endCoords = { x: this.position.x, y: 0 };
         yvel = -5;
@@ -160,7 +225,7 @@ export class Player {
         break;
       case "w":
         startCoords = {
-          x: this.position.x,
+          x: this.position.x - projWidth,
           y: this.position.y + this.height / 2 - projHeight / 2,
         };
         endCoords = { x: 0, y: this.position.y };
@@ -180,9 +245,10 @@ export class Player {
     this.projectiles.push(proj);
 
     this.onShootCooldown = true;
+    let cooldown = this.fasterShoot ? 500 : 1000;
     setTimeout(() => {
       this.onShootCooldown = false;
-    }, 1000);
+    }, cooldown);
   }
 
   addNewEnemy(Enemy) {
